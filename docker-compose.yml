@@ -1,0 +1,22 @@
+services:
+  oracle:
+    image: gvenzl/oracle-free:23.26.3-slim
+    ports:
+      - "127.0.0.1:1521:1521"
+    environment:
+      # 로컬 개발 전용 계정이에요. 이 DB는 각자 컴퓨터 안(localhost)에서만 접속되고 외부에 노출되지 않아요.
+      # 그래도 이 비밀번호는 절대 다른 곳(진짜 서비스 계정 등)에 재사용하지 마세요 — 저장소에 평문으로 커밋돼 있어요.
+      ORACLE_PASSWORD: LocalDev_1234
+      APP_USER: makershelf
+      APP_USER_PASSWORD: LocalDev_1234
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+
+volumes:
+  oracle-data:

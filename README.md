@@ -4,7 +4,7 @@
 
 ## 스택
 
-- **백엔드**: Java 17, Spring Boot, Gradle, Oracle DB (팀 최종 확정 전, 임시 선택)
+- **백엔드**: Java 17, Spring Boot, Gradle, Oracle DB (Docker로 각자 로컬에서 실행)
 - **프론트엔드**: React, TypeScript, Vite, Tailwind CSS, shadcn/ui
 
 ## 시작하기

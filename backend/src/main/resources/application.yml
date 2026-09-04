@@ -2,7 +2,7 @@ spring:
   application:
     name: MakerShelf
   datasource:
-    url: jdbc:oracle:thin:@${DB_HOST:localhost}:${DB_PORT:1521}/${DB_SERVICE:XEPDB1}
+    url: jdbc:oracle:thin:@${DB_HOST:localhost}:${DB_PORT:1521}/${DB_SERVICE:FREEPDB1}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:
