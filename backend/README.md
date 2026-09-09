@@ -109,6 +109,6 @@ GET http://localhost:8080/api/health
 - **`java` 명령을 못 찾는다 / 버전이 다르다**: 설치 후 터미널 재시작. 여러 JDK가 섞여있다면 `JAVA_HOME`을 17로 맞추세요.
 - **`docker` 명령을 찾을 수 없다 / "Cannot connect to the Docker daemon"**: Docker Desktop을 설치만 하고 실행을 안 했을 가능성이 커요. Docker Desktop 앱을 직접 열고 "Running" 상태가 될 때까지 기다린 뒤 다시 시도하세요.
 - **DB 연결 오류(`ORA-...`, connection refused 등)**: `docker compose ps`로 `oracle` 컨테이너가 `healthy` 상태인지 먼저 확인하세요. 아직 초기화 중이라면(`starting` 상태) 조금 더 기다렸다가 다시 시도하세요. 컨테이너가 안 떠 있다면 `docker compose up -d`부터 다시 실행하세요.
-- **`docker compose up`이 포트 오류를 낸다 (`port is already allocated` 등)**: 컴퓨터에 이미 Oracle이나 다른 프로그램이 1521 포트를 쓰고 있는 경우예요. 그 프로그램을 끄거나, `docker-compose.yml`의 포트를 `"127.0.0.1:1522:1521"`처럼 바꾸고 `.env`의 `DB_PORT`도 맞춰서 바꾸세요.
+- **`docker compose up`이 포트 오류를 낸다 (`port is already allocated` 등)**: 컴퓨터에 이미 Oracle이나 다른 프로그램이 1521 포트를 쓰고 있는 경우예요. `docker-compose.yml`은 건드리지 마세요 — 저장소 루트(`MakerShelf/`)에 (커밋되지 않는) `.env` 파일을 만들고 `DB_HOST_PORT=1522`처럼 원하는 포트를 적으면, `docker compose`가 자동으로 그 값을 읽어서 다른 포트로 띄워요. 그리고 `backend`를 실행할 때 쓰는 `DB_PORT` 환경변수도 같은 값으로 맞춰주세요. 이렇게 하면 나만의 로컬 설정이라 다른 팀원에게는 영향 없어요.
 - **컨테이너가 계속 재시작되거나 "no space left on device" 오류가 난다**: Docker Desktop이 쓸 수 있는 디스크/메모리가 부족한 경우예요. Docker Desktop 설정(Settings → Resources)에서 할당된 메모리/디스크를 확인하고, 컴퓨터 자체 여유 공간도 확인하세요. 이 이미지는 최소 4GB 정도는 Docker에 할당돼 있어야 안정적으로 돌아가요 (참고: 5.7GB 환경에서는 문제없이 동작 확인함 — 이보다 낮은 사양에서도 되는지는 아직 확인 안 됨).
 - **`gradlew.bat`을 실행할 수 없다는 오류**: `backend` 폴더 안에서 실행하고 있는지 확인하세요 (`cd backend` 먼저).
