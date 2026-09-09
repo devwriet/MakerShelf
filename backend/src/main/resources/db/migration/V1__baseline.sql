@@ -1,0 +1,1 @@
+-- Flyway baseline. Real schema starts with Phase 1 (creators table).
