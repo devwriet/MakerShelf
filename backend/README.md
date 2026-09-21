@@ -104,6 +104,10 @@ GET http://localhost:8080/api/health
 - `src/main/resources/application.yml` — 설정 (DB 접속 정보는 환경변수 참조, 하드코딩 없음)
 - `src/test/` — 테스트 코드
 
+## AI 코딩 도구 사용 팁
+
+AI 도구로 이 폴더 작업을 할 때는 [AI-PROMPTING.md](./AI-PROMPTING.md)를 참고하세요.
+
 ## 자주 겪는 문제
 
 - **`java` 명령을 못 찾는다 / 버전이 다르다**: 설치 후 터미널 재시작. 여러 JDK가 섞여있다면 `JAVA_HOME`을 17로 맞추세요.

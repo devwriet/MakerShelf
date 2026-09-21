@@ -52,6 +52,10 @@ npm run dev
 npx shadcn@latest add <component-name>
 ```
 
+## AI 코딩 도구 사용 팁
+
+AI 도구로 이 폴더 작업을 할 때는 [AI-PROMPTING.md](./AI-PROMPTING.md)를 참고하세요.
+
 ## 빌드
 
 ```bash
