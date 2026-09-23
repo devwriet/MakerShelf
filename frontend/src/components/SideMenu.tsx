@@ -59,7 +59,17 @@ export function SideMenu({ open, onClose, onNavigate }: SideMenuProps) {
       contentStyle={{ padding: PANEL_PAD }}
     >
       <div className="flex h-full shrink-0 flex-col" style={{ width: ITEM_W }}>
-        <div className="relative mb-6 flex items-center justify-center">
+        {/* height + negative top margin (canceling the panel's own
+            PANEL_PAD) match this row to the navbar's own h-[58px]/h-[74px]
+            and top Y - so the "메뉴" row lines up exactly with the navbar
+            bar sitting next to it, same top edge and same height. No bottom
+            margin either, so the divider line right after this sits flush
+            against its bottom edge - which is now also the navbar's own
+            bottom edge, so the two line up. */}
+        <div
+          className="relative flex h-[58px] shrink-0 items-center justify-center sm:h-[74px]"
+          style={{ marginTop: -PANEL_PAD }}
+        >
           <span className="text-2xl leading-none font-light tracking-wide text-ink-soft">{t.sideMenu.menu}</span>
           {/* hover scale+shadow live on this plain wrapper, not the glass
               button itself - backdrop-filter + overflow:hidden + box-shadow
