@@ -29,7 +29,7 @@ export function FeaturesSection() {
       <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-10">
         <div className="flex flex-col items-center gap-3 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">{t.features.title}</h2>
-          <p className="whitespace-nowrap text-sm text-ink-soft">{t.features.subtitle}</p>
+          <p className="text-sm text-balance text-ink-soft">{t.features.subtitle}</p>
         </div>
 
         <div

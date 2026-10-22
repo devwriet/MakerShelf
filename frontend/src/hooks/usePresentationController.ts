@@ -83,6 +83,9 @@ export function usePresentationController() {
 
     const handleDelta = (deltaY: number, preventDefault: () => void) => {
       if (Math.abs(deltaY) < 1) return
+      // something modal (the fullscreen side menu) owns the screen - the
+      // page underneath must stay put
+      if (document.documentElement.hasAttribute("data-scroll-locked")) return
 
       // a slide (to Hero or to Roles) is already committed and mid-flight -
       // block every kind of scroll input, native included, so nothing can
@@ -165,13 +168,22 @@ export function usePresentationController() {
       }
     }
 
-    const onWheel = (e: WheelEvent) => handleDelta(e.deltaY, () => e.preventDefault())
+    // elements marked data-own-scroll (e.g. the side menu's list) scroll
+    // natively - the slide controller must not swallow their wheel/touch
+    const ownsScroll = (target: EventTarget | null) =>
+      target instanceof Element && target.closest("[data-own-scroll]") !== null
+
+    const onWheel = (e: WheelEvent) => {
+      if (ownsScroll(e.target)) return
+      handleDelta(e.deltaY, () => e.preventDefault())
+    }
 
     let touchStartY = 0
     const onTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0].clientY
     }
     const onTouchMove = (e: TouchEvent) => {
+      if (ownsScroll(e.target)) return
       const y = e.touches[0].clientY
       const delta = touchStartY - y
       touchStartY = y
@@ -184,9 +196,18 @@ export function usePresentationController() {
       ArrowUp: -120,
       PageUp: -120,
     }
+    // arrow keys belong to whatever has focus when it's a text field or a
+    // widget with its own keyboard nav (search box, language dropdown) -
+    // only page-level keypresses should drive the slides.
+    const ownsArrowKeys = (target: EventTarget | null) =>
+      target instanceof HTMLElement &&
+      (target.isContentEditable ||
+        target.closest("input, textarea, select, [role='menu'], [role='listbox'], [role='combobox']") !== null)
+
     const onKeyDown = (e: KeyboardEvent) => {
       const d = KEY_DELTA[e.key]
       if (d === undefined) return
+      if (e.defaultPrevented || ownsArrowKeys(e.target)) return
       handleDelta(d, () => e.preventDefault())
     }
 

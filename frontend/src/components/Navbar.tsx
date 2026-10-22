@@ -1,24 +1,79 @@
-import { Menu, Search } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { Menu, Search, UserRound, X } from "lucide-react"
+import { useEffect, useRef, useState, useSyncExternalStore, type ComponentProps } from "react"
 import { Link } from "react-router-dom"
 import { LanguageToggle } from "@/components/LanguageToggle"
 import { LiquidGlass } from "@/components/LiquidGlass"
+import { SearchField } from "@/components/SearchField"
 import { SideMenu } from "@/components/SideMenu"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/i18n/LanguageContext"
 import { cn } from "@/lib/utils"
+
+// How much of the bar fits at the current width:
+//  - full    (>= 1400px): search field + language + login/signup all inline
+//  - compact (>= 1100px): search collapses to an icon; opening it swaps the
+//    language/login/signup group out for the field
+//  - icons   (>= 883px):  search and account are both icons; opening either
+//    pushes the wordmark out to make room for the field / auth buttons
+//  - menu    (<= 882px):  just the wordmark and menu button - search,
+//    language and login/signup move into the side menu (SideMenu.tsx)
+type NavTier = "full" | "compact" | "icons" | "menu"
+type Expanded = "search" | "account" | null
+
+const FULL_QUERY = "(min-width: 1400px)"
+const COMPACT_QUERY = "(min-width: 1100px)"
+const ICONS_QUERY = "(min-width: 883px)"
+
+const getTier = (): NavTier => {
+  if (window.matchMedia(FULL_QUERY).matches) return "full"
+  if (window.matchMedia(COMPACT_QUERY).matches) return "compact"
+  if (window.matchMedia(ICONS_QUERY).matches) return "icons"
+  return "menu"
+}
+
+const subscribeTier = (onChange: () => void) => {
+  const queries = [FULL_QUERY, COMPACT_QUERY, ICONS_QUERY].map((q) => window.matchMedia(q))
+  queries.forEach((mq) => mq.addEventListener("change", onChange))
+  return () => queries.forEach((mq) => mq.removeEventListener("change", onChange))
+}
+
+function NavIconButton({ className, ...props }: ComponentProps<"button">) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "flex size-10 shrink-0 items-center justify-center rounded-full text-ink transition-all duration-300 ease-out hover:scale-[1.04] hover:bg-white/30 active:scale-95",
+        className,
+      )}
+      {...props}
+    />
+  )
+}
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
+  const [expanded, setExpanded] = useState<Expanded>(null)
   const rootRef = useRef<HTMLElement | null>(null)
   const { t } = useLanguage()
+  const tier = useSyncExternalStore(subscribeTier, getTier)
+
+  // a toggle only exists in the tiers that collapse it, so resizing past a
+  // breakpoint drops whatever was expanded instead of leaving it stuck open
+  const active: Expanded =
+    tier === "full" || tier === "menu" || (tier === "compact" && expanded === "account") ? null : expanded
+
+  const showSearchField = tier === "full" || active === "search"
+  const showAuthButtons = tier === "full" || (tier === "compact" && !active) || active === "account"
+  const hideLogo = tier === "icons" && active !== null
 
   useEffect(() => {
     if (!open) return
     const onClickAway = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false)
+      const target = e.target as Element
+      // the menu's language dropdown renders in a portal outside the header
+      if (target.closest?.("[data-radix-popper-content-wrapper]")) return
+      if (rootRef.current && !rootRef.current.contains(target)) setOpen(false)
     }
     const onEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false)
@@ -31,69 +86,117 @@ export function Navbar() {
     }
   }, [open])
 
+  useEffect(() => {
+    if (!active) return
+    const onEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setExpanded(null)
+    }
+    document.addEventListener("keydown", onEscape)
+    return () => document.removeEventListener("keydown", onEscape)
+  }, [active])
+
   return (
     <header ref={rootRef} className="fixed inset-x-0 top-0 z-50 flex justify-center px-[18px] pt-[16px] sm:px-[46px] sm:pt-[41px]">
-      <div className="flex w-full max-w-[1920px] items-start gap-3">
+      <div className="relative flex w-full max-w-[1920px] items-start gap-3">
         <LiquidGlass
           radius="999px"
           className={cn(
-            "h-[58px] min-w-0 flex-1 transition-[width] duration-500 sm:h-[74px]",
-            open ? "ease-[cubic-bezier(0.16,1,0.3,1)]" : "ease-[cubic-bezier(0.7,0,0.84,0)]",
+            "h-[58px] min-w-0 flex-1 transition-[width] sm:h-[74px]",
+            // up to 740px the side menu goes fullscreen over this bar and
+            // takes the wordmark with it - hide the bar the moment it opens
+            // (neither property is transitioned, so no flat-glass fade) and
+            // bring it back right away on close. opacity is needed on top
+            // of visibility: Chrome keeps painting a hidden element's
+            // backdrop-filter layer as a faint ghost of the bar.
+            open && "max-[741px]:invisible max-[741px]:opacity-0",
+            open
+              ? "duration-700 ease-[cubic-bezier(0.33,1,0.68,1)]"
+              : "duration-500 ease-[cubic-bezier(0.7,0,0.84,0)]",
           )}
           contentClassName="flex items-center gap-3 px-4 sm:gap-5 sm:px-8"
         >
-          <a href="#section-1" className="shrink-0 text-2xl font-bold tracking-tight text-ink sm:text-[40px]">
+          <a
+            href="#section-1"
+            aria-hidden={hideLogo}
+            tabIndex={hideLogo ? -1 : 0}
+            className={cn(
+              "shrink-0 overflow-hidden text-2xl font-bold tracking-tight whitespace-nowrap text-ink transition-all duration-500 ease-out sm:text-[40px]",
+              // shrinking to nothing (gap included) while the expanded
+              // field grows in from the right reads as being pushed out
+              hideLogo ? "-mr-3 max-w-0 opacity-0 sm:-mr-5" : "max-w-[320px] opacity-100",
+            )}
+          >
             MakerShelf
           </a>
 
           <div className="flex min-w-0 flex-1 items-center justify-end gap-3 sm:gap-5">
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="relative hidden min-w-0 max-w-md flex-1 transition-all duration-500 ease-out md:block"
-            >
-              <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-ink-soft/60" />
-              <Input
+            {showSearchField && (
+              <SearchField
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={t.nav.searchPlaceholder}
+                onValueChange={setQuery}
+                // only when it just appeared from the icon - the always-on
+                // full-width field shouldn't grab focus on page load
+                autoFocus={tier !== "full"}
                 className={cn(
-                  "h-11 rounded-full border-white/40 bg-white/20 pl-10 placeholder:text-ink-soft/60 transition-[padding] duration-300 focus-visible:border-white/40 focus-visible:ring-0",
-                  query ? "pr-11" : "pr-4",
+                  "flex-1",
+                  tier === "full" ? "max-w-md" : "animate-in fade-in slide-in-from-right-4 duration-300",
                 )}
+                inputClassName="bg-white/20"
               />
-              <button
-                type="submit"
-                aria-label={t.nav.searchButton}
-                tabIndex={query ? 0 : -1}
-                className={cn(
-                  "absolute right-1.5 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-white transition-all duration-300 ease-out hover:scale-[1.08] active:scale-95",
-                  query ? "scale-100 opacity-100" : "pointer-events-none scale-75 opacity-0",
-                )}
-              >
-                <Search className="size-3.5" strokeWidth={2} />
-              </button>
-            </form>
+            )}
 
             <div
-              className="flex shrink-0 items-center gap-2 transition-transform duration-500 ease-out sm:gap-3"
+              className={cn(
+                "flex min-w-0 items-center justify-end gap-2 transition-transform duration-500 ease-out sm:gap-3",
+                active === "account" ? "flex-1" : "shrink-0",
+              )}
               style={{ transform: open ? "translateX(12px)" : "translateX(0)" }}
             >
-              <LanguageToggle className="hidden sm:flex" />
+              {(tier === "compact" || tier === "icons") && !active && (
+                <NavIconButton aria-label={t.nav.searchButton} onClick={() => setExpanded("search")}>
+                  <Search className="size-5" strokeWidth={1.8} />
+                </NavIconButton>
+              )}
+              {tier === "icons" && !active && (
+                <NavIconButton aria-label={t.nav.account} onClick={() => setExpanded("account")}>
+                  <UserRound className="size-5" strokeWidth={1.8} />
+                </NavIconButton>
+              )}
 
-              <Link to="/login" className="hidden sm:inline-flex">
-                <Button className="h-11 w-28 justify-center rounded-full bg-accent px-6 text-base text-white transition-all duration-300 ease-out hover:scale-[1.04] hover:bg-accent/90 hover:shadow-[0_4px_14px_rgba(0,122,255,0.35)] active:scale-95">
-                  {t.nav.login}
-                </Button>
-              </Link>
-              <Link to="/signup" className="hidden sm:inline-flex">
-                <Button className="h-11 w-32 justify-center rounded-full bg-white px-6 text-base text-ink transition-all duration-300 ease-out hover:scale-[1.04] hover:bg-white/90 hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] active:scale-95">
-                  {t.nav.signup}
-                </Button>
-              </Link>
+              {tier !== "menu" && !active && <LanguageToggle />}
+
+              {showAuthButtons && (
+                <>
+                  <Button
+                    asChild
+                    className={cn(
+                      "h-11 justify-center rounded-full bg-accent px-6 text-base text-white transition-all duration-300 ease-out hover:scale-[1.04] hover:bg-accent/90 hover:shadow-[0_4px_14px_rgba(0,122,255,0.35)] active:scale-95",
+                      active === "account" ? "min-w-0 flex-1 px-4 animate-in fade-in slide-in-from-right-4" : "w-28",
+                    )}
+                  >
+                    <Link to="/login">{t.nav.login}</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className={cn(
+                      "h-11 justify-center rounded-full bg-white px-6 text-base text-ink transition-all duration-300 ease-out hover:scale-[1.04] hover:bg-white/90 hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] active:scale-95",
+                      active === "account" ? "min-w-0 flex-1 px-4 animate-in fade-in slide-in-from-right-4" : "w-32",
+                    )}
+                  >
+                    <Link to="/signup">{t.nav.signup}</Link>
+                  </Button>
+                </>
+              )}
+
+              {active && (
+                <NavIconButton aria-label={t.nav.close} onClick={() => setExpanded(null)} className="animate-in fade-in">
+                  <X className="size-5" strokeWidth={1.8} />
+                </NavIconButton>
+              )}
 
               <div
                 className="flex shrink-0 items-center justify-center overflow-hidden transition-all duration-500 ease-out"
-                style={{ width: open ? 0 : 56, height: 56, opacity: open ? 0 : 1 }}
+                style={{ width: open ? 0 : 56, height: 56, visibility: open ? "hidden" : "visible" }}
               >
                 {/* hover scale+shadow live on this plain wrapper, not the
                     glass button itself - backdrop-filter + overflow:hidden +
@@ -115,7 +218,7 @@ export function Navbar() {
                   >
                     <button
                       type="button"
-                      aria-label="메뉴 열기"
+                      aria-label={t.nav.openMenu}
                       onClick={() => setOpen(true)}
                       tabIndex={open ? -1 : 0}
                       className="flex size-10 shrink-0 items-center justify-center text-ink"
