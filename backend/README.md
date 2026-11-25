@@ -119,7 +119,7 @@ AI 도구로 이 폴더 작업을 할 때는 [AI-PROMPTING.md](./AI-PROMPTING.md
 
 ## 백엔드 팀 역할과 작업 내용
 
-### devwriet (팀장)
+### 유동윤 (devwriet, 팀장)
 
 **맡은 부분**: 백엔드 기본 구조, 개발 환경, 창작자 CRUD API와 검증, 테스트
 
@@ -130,7 +130,7 @@ AI 도구로 이 폴더 작업을 할 때는 [AI-PROMPTING.md](./AI-PROMPTING.md
 - 창작자 API 테스트 10개 ([#5](https://github.com/devwriet/MakerShelf/pull/5))
 - 창작자 테이블 마이그레이션(V2)과 시드 데이터(V3) ([#8](https://github.com/devwriet/MakerShelf/pull/8))
 
-### anwlroxmfl
+### 박동은 (anwlroxmfl)
 
 **맡은 부분**: 창작자 엔티티와 리포지토리, Flyway/CI와 창작자 CRUD API 공동 작업
 
