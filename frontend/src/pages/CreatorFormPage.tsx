@@ -16,6 +16,7 @@ export function CreatorFormPage() {
   const navigate = useNavigate()
   const isEditMode = id !== undefined
   const [name, setName] = useState("")
+  const [savedName, setSavedName] = useState<string | null>(null)
   const [contact, setContact] = useState("")
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -34,12 +35,14 @@ export function CreatorFormPage() {
     async function loadCreator() {
       setErrorMessage(null)
       setLoadError(null)
+      setSavedName(null)
       setIsLoading(true)
 
       try {
         const creator = await getCreator(creatorId)
         if (isCurrent) {
           setName(creator.name)
+          setSavedName(creator.name)
           setContact(creator.contact ?? "")
         }
       } catch (error) {
@@ -93,7 +96,10 @@ export function CreatorFormPage() {
     }
   }
 
-  const title = isEditMode ? "창작자 수정" : "새 창작자 등록"
+  let title = isEditMode ? "창작자 수정" : "새 창작자 등록"
+  if (isEditMode && savedName !== null) {
+    title = `${savedName}님 정보 수정`
+  }
   const subtitle = isEditMode ? "창작자 정보를 수정해주세요" : "창작자 정보를 입력해주세요"
 
   return (
@@ -112,7 +118,7 @@ export function CreatorFormPage() {
               ← 창작자 목록
             </Link>
 
-            <h1 className="mt-8 text-3xl font-semibold text-ink">{title}</h1>
+            <h1 className="mt-8 wrap-anywhere text-3xl font-semibold text-ink">{title}</h1>
             <p className="mt-2 text-sm text-black/60">{subtitle}</p>
 
             {isLoading ? (
