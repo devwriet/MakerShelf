@@ -36,6 +36,10 @@ cd MakerShelf
 - 백엔드 실행/문제 해결: [backend/README.md](./backend/README.md)
 - 프론트엔드 실행/문제 해결: [frontend/README.md](./frontend/README.md)
 
+## 프로젝트 확인 문서
+
+구현한 기능, DB 없이 실행하는 방법, 팀원별 역할은 [PROJECT.md](./PROJECT.md)에 정리했습니다.
+
 ## 기여 방법
 
 팀의 Git 워크플로우, 브랜치/PR 규칙, 커밋 메시지 규칙, 문제 해결/FAQ는 아래 문서를 참고하세요.
