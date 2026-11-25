@@ -145,8 +145,8 @@ body {
 
 .liquid-glass__filter {
   z-index: 0;
-  backdrop-filter: blur(16px) saturate(105%);
   -webkit-backdrop-filter: blur(16px) saturate(105%);
+  backdrop-filter: blur(16px) saturate(105%);
   filter: url(#lensFilter) saturate(105%) brightness(1.03);
 }
 
@@ -169,8 +169,8 @@ body {
    the panel flash flat white instead). */
 @media (max-width: 740.98px) {
   .side-menu > .liquid-glass__filter {
-    backdrop-filter: blur(48px) saturate(105%);
     -webkit-backdrop-filter: blur(48px) saturate(105%);
+    backdrop-filter: blur(48px) saturate(105%);
     filter: saturate(105%) brightness(1.03);
   }
 }

@@ -1,5 +1,6 @@
 import { Menu, Search, UserRound, X } from "lucide-react"
-import { useEffect, useRef, useState, useSyncExternalStore, type ComponentProps } from "react"
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ComponentProps } from "react"
+import { flushSync } from "react-dom"
 import { Link } from "react-router-dom"
 import { LanguageToggle } from "@/components/LanguageToggle"
 import { LiquidGlass } from "@/components/LiquidGlass"
@@ -55,8 +56,16 @@ export function Navbar() {
   const [query, setQuery] = useState("")
   const [expanded, setExpanded] = useState<Expanded>(null)
   const rootRef = useRef<HTMLElement | null>(null)
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
   const { t } = useLanguage()
   const tier = useSyncExternalStore(subscribeTier, getTier)
+
+  const closeMenu = useCallback(() => {
+    const hadFocus = document.activeElement?.closest(".side-menu")
+    // clear inert before returning focus to the trigger.
+    flushSync(() => setOpen(false))
+    if (hadFocus) triggerRef.current?.focus({ preventScroll: true })
+  }, [])
 
   // a toggle only exists in the tiers that collapse it, so resizing past a
   // breakpoint drops whatever was expanded instead of leaving it stuck open
@@ -76,7 +85,7 @@ export function Navbar() {
       if (rootRef.current && !rootRef.current.contains(target)) setOpen(false)
     }
     const onEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false)
+      if (e.key === "Escape") closeMenu()
     }
     document.addEventListener("mousedown", onClickAway)
     document.addEventListener("keydown", onEscape)
@@ -84,7 +93,7 @@ export function Navbar() {
       document.removeEventListener("mousedown", onClickAway)
       document.removeEventListener("keydown", onEscape)
     }
-  }, [open])
+  }, [open, closeMenu])
 
   useEffect(() => {
     if (!active) return
@@ -195,6 +204,7 @@ export function Navbar() {
               )}
 
               <div
+                inert={open}
                 className="flex shrink-0 items-center justify-center overflow-hidden transition-all duration-500 ease-out"
                 style={{ width: open ? 0 : 56, height: 56, visibility: open ? "hidden" : "visible" }}
               >
@@ -216,12 +226,14 @@ export function Navbar() {
                     style={{ boxShadow: "none" }}
                     contentClassName="flex items-center justify-center"
                   >
+                    {/* `visible`: same first-frame transition problem as the close
+                        button in SideMenu.tsx; inert above covers the open state. */}
                     <button
+                      ref={triggerRef}
                       type="button"
                       aria-label={t.nav.openMenu}
                       onClick={() => setOpen(true)}
-                      tabIndex={open ? -1 : 0}
-                      className="flex size-10 shrink-0 items-center justify-center text-ink"
+                      className="visible flex size-10 shrink-0 items-center justify-center text-ink"
                     >
                       <Menu className="size-5" />
                     </button>
@@ -232,7 +244,7 @@ export function Navbar() {
           </div>
         </LiquidGlass>
 
-        <SideMenu open={open} onClose={() => setOpen(false)} onNavigate={() => setOpen(false)} />
+        <SideMenu open={open} onClose={closeMenu} onNavigate={closeMenu} />
       </div>
     </header>
   )

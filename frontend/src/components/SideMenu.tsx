@@ -1,5 +1,5 @@
 import { ArrowRight, Code2, Gift, Headphones, PanelRightClose, Search, Settings, Users, X } from "lucide-react"
-import { useEffect, useState, type CSSProperties } from "react"
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react"
 import { Link } from "react-router-dom"
 import { LanguageToggle } from "@/components/LanguageToggle"
 import { LiquidGlass } from "@/components/LiquidGlass"
@@ -18,6 +18,14 @@ const ITEM_W = 313
 const ITEM_H = 69
 const ITEM_GAP = 35
 const HEADER_H = 40
+const FULLSCREEN_QUERY = "(max-width: 740.98px)"
+
+const getFullscreen = () => window.matchMedia(FULLSCREEN_QUERY).matches
+const subscribeFullscreen = (onChange: () => void) => {
+  const query = window.matchMedia(FULLSCREEN_QUERY)
+  query.addEventListener("change", onChange)
+  return () => query.removeEventListener("change", onChange)
+}
 
 interface SideMenuProps {
   open: boolean
@@ -33,22 +41,32 @@ export function SideMenu({ open, onClose, onNavigate }: SideMenuProps) {
   const [active, setActive] = useState(0)
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState("")
+  const closeRef = useRef<HTMLButtonElement | null>(null)
   const { t } = useLanguage()
+  const fullscreen = useSyncExternalStore(subscribeFullscreen, getFullscreen)
+
+  useEffect(() => {
+    if (open) closeRef.current?.focus({ preventScroll: true })
+  }, [open])
 
   // fullscreen (<= 740px) the menu is modal: freeze the page behind it.
   // overflow:hidden stops native scrolling; the attribute tells the slide
   // controller (usePresentationController) to stop driving it too.
+  // inert keeps Tab out of it.
   useEffect(() => {
-    if (!open || !window.matchMedia("(max-width: 740.98px)").matches) return
+    if (!open || !fullscreen) return
     const root = document.documentElement
+    const page = document.getElementById("page-content")
     const prevOverflow = root.style.overflow
     root.style.overflow = "hidden"
     root.setAttribute("data-scroll-locked", "")
+    page?.toggleAttribute("inert", true)
     return () => {
       root.style.overflow = prevOverflow
       root.removeAttribute("data-scroll-locked")
+      page?.toggleAttribute("inert", false)
     }
-  }, [open])
+  }, [open, fullscreen])
 
   const first = { icon: ArrowRight, label: t.sideMenu.getStarted, href: "#" }
   const rest = [
@@ -62,7 +80,7 @@ export function SideMenu({ open, onClose, onNavigate }: SideMenuProps) {
   return (
     <LiquidGlass
       radius="2rem"
-      aria-hidden={!open}
+      inert={!open}
       className={cn(
         // up to 740px the panel overlays the whole navbar row at full width
         // (a 350px side panel no longer fits beside the bar) instead of
@@ -143,12 +161,16 @@ export function SideMenu({ open, onClose, onNavigate }: SideMenuProps) {
               style={{ boxShadow: "none" }}
               contentClassName="flex items-center justify-center"
             >
+              {/* `visible`: the panel's and wrapper's transition-all keeps inherited
+                  visibility hidden on the first frame, which would make the focus()
+                  on open silently fail. */}
               <button
+                ref={closeRef}
                 type="button"
                 aria-label={t.nav.closeMenu}
                 onClick={onClose}
                 tabIndex={open ? 0 : -1}
-                className="flex items-center justify-center text-ink-soft transition-colors hover:text-ink"
+                className="visible flex items-center justify-center text-ink-soft transition-colors hover:text-ink"
                 style={{ width: HEADER_H, height: HEADER_H }}
               >
                 <PanelRightClose className="size-[18px]" strokeWidth={1.5} />
