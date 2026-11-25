@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom"
 import { GlassFilters } from "@/components/GlassFilters"
 import { HomePage } from "@/pages/HomePage"
 import { LoginPage } from "@/pages/LoginPage"
+import { NotFoundPage } from "@/pages/NotFoundPage"
 import { SignupPage } from "@/pages/SignupPage"
 import { CreatorsListPage } from "@/pages/CreatorsListPage"
 import { CreatorFormPage } from "@/pages/CreatorFormPage"
@@ -17,6 +18,7 @@ function App() {
         <Route path="/creators" element={<CreatorsListPage />} />
         <Route path="/creators/new" element={<CreatorFormPage />} />
         <Route path="/creators/:id/edit" element={<CreatorFormPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   )

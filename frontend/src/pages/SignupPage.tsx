@@ -13,11 +13,11 @@ export function SignupPage() {
       <h1 className="text-center text-4xl font-extralight text-ink">{copy.title}</h1>
 
       <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
-        <AuthInput type="email" placeholder={copy.email} autoComplete="email" />
-        <AuthInput type="tel" placeholder={copy.phone} autoComplete="tel" />
-        <AuthInput type="text" placeholder={copy.id} autoComplete="username" />
-        <AuthInput type="password" placeholder={copy.password} autoComplete="new-password" />
-        <AuthInput type="password" placeholder={copy.checkPassword} autoComplete="new-password" />
+        <AuthInput type="email" label={copy.email} placeholder={copy.email} autoComplete="email" />
+        <AuthInput type="tel" label={copy.phone} placeholder={copy.phone} autoComplete="tel" />
+        <AuthInput type="text" label={copy.id} placeholder={copy.id} autoComplete="username" />
+        <AuthInput type="password" label={copy.password} placeholder={copy.password} autoComplete="new-password" />
+        <AuthInput type="password" label={copy.checkPassword} placeholder={copy.checkPassword} autoComplete="new-password" />
 
         <Button
           type="submit"
@@ -31,15 +31,13 @@ export function SignupPage() {
 
       <div className="flex flex-col items-center gap-4">
         <span className="text-sm text-ink-soft">{copy.haveAccount}</span>
-        <Link to="/login" className="w-full">
-          <Button
-            type="button"
-            variant="outline"
-            className="h-[50px] w-full rounded-full border-black/10 bg-white text-base text-ink transition-all duration-300 ease-out hover:scale-[1.02] hover:bg-white/90 hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] active:scale-95"
-          >
-            {copy.switch}
-          </Button>
-        </Link>
+        <Button
+          asChild
+          variant="outline"
+          className="h-[50px] w-full rounded-full border-black/10 bg-white text-base text-ink transition-all duration-300 ease-out hover:scale-[1.02] hover:bg-white/90 hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)] active:scale-95"
+        >
+          <Link to="/login">{copy.switch}</Link>
+        </Button>
       </div>
     </AuthLayout>
   )

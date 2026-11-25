@@ -14,6 +14,7 @@ export function HomePage() {
       <Navbar />
 
       <div
+        id="page-content"
         style={{
           background: "linear-gradient(135deg, #efe9e1 0%, #dfd5c6 50%, #cbbfa4 100%)",
           backgroundAttachment: "fixed",

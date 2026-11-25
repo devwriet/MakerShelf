@@ -1,11 +1,18 @@
-import { createContext, type ReactNode, useContext, useEffect, useState } from "react"
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react"
 import { LOCALES, type Locale, TRANSLATIONS, type TranslationShape } from "@/i18n/translations"
 
 const STORAGE_KEY = "makershelf-locale"
 
 function getInitialLocale(): Locale {
   if (typeof window === "undefined") return "ko"
-  const stored = window.localStorage.getItem(STORAGE_KEY)
+  // storage can throw when blocked (privacy modes, sandboxed iframes) -
+  // fall back to the browser language instead of crashing the whole app
+  let stored: string | null = null
+  try {
+    stored = window.localStorage.getItem(STORAGE_KEY)
+  } catch {
+    // ignore
+  }
   if (stored && (LOCALES as readonly string[]).includes(stored)) return stored as Locale
   return navigator.language.toLowerCase().startsWith("en") ? "en" : "ko"
 }
@@ -22,14 +29,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(getInitialLocale)
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, locale)
+    try {
+      window.localStorage.setItem(STORAGE_KEY, locale)
+    } catch {
+      // storage blocked - the choice just won't persist across reloads
+    }
     document.documentElement.lang = locale
   }, [locale])
 
-  const setLocale = (next: Locale) => setLocaleState(next)
+  // memoized so consumers only re-render on an actual locale change, not
+  // every time a parent re-renders (e.g. on each scroll-progress update)
+  const value = useMemo(() => ({ locale, setLocale: setLocaleState, t: TRANSLATIONS[locale] }), [locale])
 
   return (
-    <LanguageContext.Provider value={{ locale, setLocale, t: TRANSLATIONS[locale] }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   )

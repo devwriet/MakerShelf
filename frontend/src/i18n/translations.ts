@@ -10,8 +10,13 @@ const ko = {
   nav: {
     searchPlaceholder: "검색...",
     searchButton: "검색",
+    clearSearch: "검색어 지우기",
     login: "로그인",
     signup: "회원가입",
+    account: "계정",
+    close: "닫기",
+    openMenu: "메뉴 열기",
+    closeMenu: "메뉴 닫기",
   },
   hero: {
     title: "위탁 재고관리, 이제 한 곳에서",
@@ -59,6 +64,8 @@ const ko = {
   },
   auth: {
     home: "홈으로",
+    showPassword: "비밀번호 표시",
+    hidePassword: "비밀번호 숨기기",
     login: {
       title: "로그인",
       id: "아이디",
@@ -79,14 +86,24 @@ const ko = {
       switch: "로그인",
     },
   },
+  notFound: {
+    title: "페이지를 찾을 수 없어요",
+    description: "주소가 잘못되었거나 페이지가 이동되었을 수 있어요.",
+    home: "홈으로 돌아가기",
+  },
 }
 
 const en: typeof ko = {
   nav: {
     searchPlaceholder: "Search...",
     searchButton: "Search",
-    login: "Login",
+    clearSearch: "Clear search",
+    login: "Log in",
     signup: "Sign up",
+    account: "Account",
+    close: "Close",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
   },
   hero: {
     title: "Consignment inventory, all in one place",
@@ -135,11 +152,13 @@ const en: typeof ko = {
   },
   auth: {
     home: "Home",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
     login: {
-      title: "Login",
+      title: "Log in",
       id: "ID",
       password: "Password",
-      submit: "Sign in",
+      submit: "Log in",
       noAccount: "Don't have an account?",
       switch: "Sign up",
     },
@@ -152,8 +171,13 @@ const en: typeof ko = {
       checkPassword: "Check Password",
       submit: "Sign up",
       haveAccount: "Already have an account?",
-      switch: "Sign in",
+      switch: "Log in",
     },
+  },
+  notFound: {
+    title: "Page not found",
+    description: "The address may be wrong, or the page may have moved.",
+    home: "Back to home",
   },
 }
 
