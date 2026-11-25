@@ -116,3 +116,25 @@ AI 도구로 이 폴더 작업을 할 때는 [AI-PROMPTING.md](./AI-PROMPTING.md
 - **`docker compose up`이 포트 오류를 낸다 (`port is already allocated` 등)**: 컴퓨터에 이미 Oracle이나 다른 프로그램이 1521 포트를 쓰고 있는 경우예요. `docker-compose.yml`은 건드리지 마세요 — 저장소 루트(`MakerShelf/`)에 (커밋되지 않는) `.env` 파일을 만들고 `DB_HOST_PORT=1522`처럼 원하는 포트를 적으면, `docker compose`가 자동으로 그 값을 읽어서 다른 포트로 띄워요. 그리고 `backend`를 실행할 때 쓰는 `DB_PORT` 환경변수도 같은 값으로 맞춰주세요. 이렇게 하면 나만의 로컬 설정이라 다른 팀원에게는 영향 없어요.
 - **컨테이너가 계속 재시작되거나 "no space left on device" 오류가 난다**: Docker Desktop이 쓸 수 있는 디스크/메모리가 부족한 경우예요. Docker Desktop 설정(Settings → Resources)에서 할당된 메모리/디스크를 확인하고, 컴퓨터 자체 여유 공간도 확인하세요. 이 이미지는 최소 4GB 정도는 Docker에 할당돼 있어야 안정적으로 돌아가요 (참고: 5.7GB 환경에서는 문제없이 동작 확인함 — 이보다 낮은 사양에서도 되는지는 아직 확인 안 됨).
 - **`gradlew.bat`을 실행할 수 없다는 오류**: `backend` 폴더 안에서 실행하고 있는지 확인하세요 (`cd backend` 먼저).
+
+## 백엔드 팀 역할과 작업 내용
+
+### devwriet (팀장)
+
+**맡은 부분**: 백엔드 기본 구조, 개발 환경, 창작자 CRUD API와 검증, 테스트
+
+- Spring Boot 프로젝트 기본 구조와 상태 확인 API(`GET /api/health`)
+- 로컬 Oracle Docker 설정, 포트 충돌 시 `.env`로 바꾸는 방법
+- Flyway 도입, PR마다 빌드와 테스트를 돌리는 CI (anwlroxmfl과 함께)
+- 창작자 CRUD API: Controller, Service, 요청/응답 DTO, 400/404 예외 처리 (anwlroxmfl과 함께, [#4](https://github.com/devwriet/MakerShelf/pull/4))
+- 창작자 API 테스트 10개 ([#5](https://github.com/devwriet/MakerShelf/pull/5))
+- 창작자 테이블 마이그레이션(V2)과 시드 데이터(V3) ([#8](https://github.com/devwriet/MakerShelf/pull/8))
+
+### anwlroxmfl
+
+**맡은 부분**: 창작자 엔티티와 리포지토리, Flyway/CI와 창작자 CRUD API 공동 작업
+
+- `Creator` 엔티티: 필드(`id`, `name`, `contact`)와 getter/setter ([#3](https://github.com/devwriet/MakerShelf/pull/3))
+- `CreatorRepository` ([#3](https://github.com/devwriet/MakerShelf/pull/3))
+- Flyway 도입과 CI 공동 작업 (devwriet와 함께, 커밋은 devwriet 계정)
+- 창작자 CRUD API 공동 작업 (devwriet와 함께, 커밋은 devwriet 계정), PR 승인과 머지 ([#4](https://github.com/devwriet/MakerShelf/pull/4))

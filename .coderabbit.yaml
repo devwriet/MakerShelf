@@ -1,0 +1,44 @@
+language: "ko-KR"
+
+tone_instructions: >
+  이 저장소는 학생 팀 프로젝트예요. 코멘트는 짧고 실행 가능하게 작성해주세요 —
+  문제 위치, 무엇이 왜 문제인지, 어떻게 고치는지를 한두 줄로. 장황한 설명이나
+  일반론적인 베스트 프랙티스 나열은 피해주세요. 이 프로젝트 규모에서 실제로
+  중요하지 않은 엔터프라이즈급 지적(과도한 추상화 제안, 불필요한 테스트 커버리지
+  요구 등)은 하지 마세요.
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+  sequence_diagrams: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!**/*.lock"
+    - "!**/package-lock.json"
+    - "!**/node_modules/**"
+    - "!**/build/**"
+    - "!**/dist/**"
+    - "!frontend/src/components/ui/**"
+  path_instructions:
+    - path: "frontend/**/*.tsx"
+      instructions: >
+        React/TypeScript 프론트엔드예요. 접근성(라벨, aria 속성), 실제 버그,
+        타입 안전성 위주로 봐주시고, 코드 스타일 취향 지적은 최소화해주세요.
+        `frontend/src/components/ui/**`는 shadcn CLI로 생성된 코드라 리뷰 대상이
+        아니에요.
+    - path: "backend/**/*.java"
+      instructions: >
+        Spring Boot 백엔드예요. 검증 로직, 예외 처리, DB 마이그레이션(Flyway)
+        정합성 위주로 봐주세요.
+  finishing_touches:
+    docstrings:
+      enabled: false
+
+chat:
+  auto_reply: true
